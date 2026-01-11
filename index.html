@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESG Risk Decision Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <h1>ESG Risk Decision Dashboard <span class="sector-badge" id="sectorBadge">Custom Portfolio</span></h1>
+  <p class="subtitle">
+    A browser-only framework that translates ESG risk into capital allocation signals.
+    <br><strong>All data stays on your machine.</strong>
+  </p>
+
+  <!-- Upload Section -->
+  <div class="upload-box">
+    <label for="fileInput">📁 Upload CSV Portfolio Data</label>
+    <input type="file" id="fileInput" accept=".csv">
+    <p class="helper-text">Or use sector presets below</p>
+  </div>
+
+  <!-- Sector Configuration -->
+  <div class="section">
+    <h2>🏭 Sector Configuration</h2>
+    <div class="sector-selector">
+      <label for="sectorSelect">Select Industry:</label>
+      <select id="sectorSelect">
+        <option value="custom">Custom / All Sectors</option>
+        <option value="energy">Energy & Utilities</option>
+        <option value="tech">Technology</option>
+        <option value="manufacturing">Manufacturing</option>
+        <option value="finance">Financial Services</option>
+        <option value="healthcare">Healthcare</option>
+      </select>
+      <button onclick="loadSectorPreset()">Apply Sector Preset</button>
+    </div>
+    
+    <div id="sectorDescription" class="sector-description">
+      <strong>Custom Mode:</strong> Define your own risks and weights
+    </div>
+    
+    <div class="benchmark-toggle">
+      <input type="checkbox" id="showBenchmark">
+      <label for="showBenchmark">Show sector average benchmarks (for comparison)</label>
+    </div>
+  </div>
+
+  <!-- Risk Scoring Controls -->
+  <div class="section">
+    <h2>⚖️ Risk Scoring Controls</h2>
+    <div class="controls">
+      <div class="control-group">
+        <label for="probWeight">
+          <div class="control-label">Probability Weight</div>
+          <div class="control-value" id="probValue">3</div>
+        </label>
+        <input type="range" id="probWeight" min="1" max="5" value="3" step="0.5">
+        <div class="control-range">
+          <span>Conservative</span>
+          <span>Agressive</span>
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label for="impactWeight">
+          <div class="control-label">Financial Impact Weight</div>
+          <div class="control-value" id="impactValue">3</div>
+        </label>
+        <input type="range" id="impactWeight" min="1" max="5" value="3" step="0.5">
+        <div class="control-range">
+          <span>Low Impact</span>
+          <span>High Impact</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Content (Initially Hidden) -->
+  <div id="dashboard" class="hidden">
+
+    <!-- Heatmap Section -->
+    <div class="section">
+      <h2>📊 Portfolio ESG Risk Heatmap</h2>
+      <p class="heatmap-subtitle">Probability × Financial Impact = Risk Score</p>
+      <div id="heatmap" class="heatmap"></div>
+      <div class="heatmap-legend">
+        <div class="legend-item"><span class="legend-color low"></span> Low Risk</div>
+        <div class="legend-item"><span class="legend-color medium"></span> Medium Risk</div>
+        <div class="legend-item"><span class="legend-color high"></span> High Risk</div>
+      </div>
+    </div>
+
+    <!-- Risk Momentum Tracker -->
+    <div class="section">
+      <h2>📈 Risk Momentum Tracker</h2>
+      <div class="table-container">
+        <table id="momentumTable">
+          <thead>
+            <tr>
+              <th>Risk Factor</th>
+              <th>12–24 Months</th>
+              <th>3–5 Years</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Capital Allocation Signals -->
+    <div class="section">
+      <h2>🎯 Capital Allocation Signals</h2>
+      <div class="logic-summary">
+        <div class="logic-card invest">
+          <h3>INVEST / SCALE</h3>
+          <p>Low or improving risk profile<br>Clear operational controls</p>
+        </div>
+        <div class="logic-card engage">
+          <h3>ENGAGE / CONDITIONAL</h3>
+          <p>Material risk exists<br>Mitigation levers available</p>
+        </div>
+        <div class="logic-card exit">
+          <h3>AVOID / EXIT</h3>
+          <p>High & accelerating risk<br>Weak incentives for change</p>
+        </div>
+      </div>
+      
+      <div class="table-container">
+        <table id="decisionTable">
+          <thead>
+            <tr>
+              <th>Risk Factor</th>
+              <th>Risk Score</th>
+              <th>Allocation Signal</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Export Section -->
+    <div class="section">
+      <h2>📄 Export & Share</h2>
+      <div class="export-actions">
+        <button class="export-btn" onclick="exportPDF()">
+          📥 Download Decision Snapshot (PDF)
+        </button>
+        <button class="export-btn secondary" onclick="exportCSV()">
+          📊 Export Risk Data (CSV)
+        </button>
+        <button class="export-btn secondary" onclick="copyToClipboard()">
+          📋 Copy Summary to Clipboard
+        </button>
+      </div>
+      <p class="export-note">
+        All exports are generated locally. No data leaves your browser.
+      </p>
+    </div>
+
+    <!-- Decision Logic Explanation -->
+    <div class="section logic-section">
+      <h2>🧮 Decision Logic (Transparent & Editable)</h2>
+      <div class="logic-rules">
+        <div class="rule">
+          <h3>AVOID / EXIT Signal</h3>
+          <p>Triggers when: <code>Probability ≥ 4 AND Impact ≥ 4 AND (Momentum = "Up" OR "Critical")</code></p>
+          <p>Financial translation: Likely capital impairment, EBITDA volatility >15%</p>
+        </div>
+        <div class="rule">
+          <h3>ENGAGE / CONDITIONAL Signal</h3>
+          <p>Triggers when: <code>Probability ≥ 3 OR Impact ≥ 4</code></p>
+          <p>Financial translation: Manageable risk with mitigation ROI > 1.5x</p>
+        </div>
+        <div class="rule">
+          <h3>INVEST / SCALE Signal</h3>
+          <p>Triggers when: <code>Risk Score < 12 AND Momentum stable/improving</code></p>
+          <p>Financial translation: Clean capital deployment, margin stability</p>
+        </div>
+      </div>
+      <p class="logic-note">
+        <strong>Note:</strong> Edit these rules directly in <code>script.js</code> to match your organization's risk appetite.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>ESG Risk Decision Dashboard v1.1 • Client-Side Edition</p>
+    <p class="footer-note">
+      All calculations run locally in your browser. No data is stored or transmitted.
+      <br>Built for finance, risk, and sustainability teams.
+    </p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
