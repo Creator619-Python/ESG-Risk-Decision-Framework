@@ -1,0 +1,11 @@
+Risk_Name,Probability_Score,Financial_Impact,Momentum_12_24M,Momentum_3_5Y
+Carbon Pricing Exposure,5,5,Up,Critical
+Water Stress - Manufacturing Clusters,4,4,Up,Critical
+Supply Chain Labor Conditions,3,4,Stable,Up
+Worker Safety - Operations,2,3,Down,Stable
+Data Center Energy Use,4,3,Up,Up
+E-Waste & Circularity,3,3,Up,Up
+Policy Uncertainty,5,4,Up,Critical
+Stranded Asset Risk,4,5,Up,Critical
+Biodiversity Portfolio Risk,2,3,Up,Up
+Just Transition Financing,3,2,Stable,Up
