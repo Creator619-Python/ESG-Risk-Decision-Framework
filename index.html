@@ -15,18 +15,107 @@
     <br><strong>All data stays on your machine.</strong>
   </p>
 
-  <!-- Upload Section -->
-  <div class="upload-box">
-    <label for="fileInput">📁 Upload CSV Portfolio Data</label>
-    <input type="file" id="fileInput" accept=".csv">
-    <p class="helper-text">Or use sector presets below</p>
+  <!-- Step 1: Choose Input Method -->
+  <div class="section">
+    <h2>📥 Choose Your Data Input Method</h2>
+    <div class="input-methods">
+      <div class="method-card" id="methodInline">
+        <div class="method-icon">✍️</div>
+        <h3>1. Manual Entry (Recommended)</h3>
+        <p>Type risks directly. No files needed. Start here.</p>
+        <button class="method-btn" onclick="showMethod('inline')">Start Typing →</button>
+      </div>
+      
+      <div class="method-card" id="methodCSV">
+        <div class="method-icon">📁</div>
+        <h3>2. CSV Upload</h3>
+        <p>Upload your existing ESG data. Use for bulk analysis.</p>
+        <button class="method-btn" onclick="showMethod('csv')">Upload CSV →</button>
+      </div>
+      
+      <div class="method-card" id="methodSample">
+        <div class="method-icon">🎯</div>
+        <h3>3. Sector Templates</h3>
+        <p>Pre-configured risks for your industry. Great for demos.</p>
+        <button class="method-btn" onclick="showMethod('sample')">Use Template →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inline Data Entry (Initially Hidden) -->
+  <div id="inlineEntry" class="section hidden">
+    <div class="section-header">
+      <h2>✍️ Manual Risk Entry</h2>
+      <p class="helper-text">Type risks below — no file needed. CSV export available after entry.</p>
+    </div>
+    
+    <table id="inputTable" class="input-table">
+      <thead>
+        <tr>
+          <th>Risk Factor</th>
+          <th>
+            Probability
+            <div class="help-text">1–5 scale<br>(5 = High)</div>
+          </th>
+          <th>
+            Financial Impact
+            <div class="help-text">1–5 scale<br>(5 = High)</div>
+          </th>
+          <th>
+            12–24 Months
+            <div class="help-text">Momentum</div>
+          </th>
+          <th>
+            3–5 Years
+            <div class="help-text">Momentum</div>
+          </th>
+          <th style="width: 60px;"></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <!-- Rows will be added here -->
+      </tbody>
+    </table>
+    
+    <div class="table-controls">
+      <button class="btn-secondary" onclick="addRow()">＋ Add Risk Factor</button>
+      <button class="btn-primary" onclick="useTableData()">▶ Analyze Entered Data</button>
+      <button class="btn-secondary" onclick="clearTable()">🗑️ Clear All</button>
+    </div>
+    
+    <div class="tip-box">
+      <strong>Tip:</strong> Start with 2–3 risks to see how the tool works. Add more later.
+    </div>
+  </div>
+
+  <!-- CSV Upload (Initially Hidden) -->
+  <div id="csvUpload" class="section hidden">
+    <div class="section-header">
+      <h2>📁 CSV Upload</h2>
+      <p class="helper-text">Upload your ESG risk data in CSV format.</p>
+    </div>
+    
+    <div class="upload-box">
+      <label for="fileInput">Select CSV File</label>
+      <input type="file" id="fileInput" accept=".csv">
+      <div class="upload-note">
+        Required columns: <code>Risk_Name,Probability_Score,Financial_Impact,Momentum_12_24M,Momentum_3_5Y</code>
+      </div>
+      <div class="tip-box">
+        <strong>Need a template?</strong> 
+        <a href="javascript:void(0)" onclick="downloadTemplate()">Download CSV template</a>
+      </div>
+    </div>
   </div>
 
   <!-- Sector Configuration -->
-  <div class="section">
-    <h2>🏭 Sector Configuration</h2>
+  <div id="sectorConfig" class="section hidden">
+    <div class="section-header">
+      <h2>🏭 Sector Configuration</h2>
+      <p class="helper-text">Select your industry to load relevant risk templates.</p>
+    </div>
+    
     <div class="sector-selector">
-      <label for="sectorSelect">Select Industry:</label>
       <select id="sectorSelect">
         <option value="custom">Custom / All Sectors</option>
         <option value="energy">Energy & Utilities</option>
@@ -35,21 +124,16 @@
         <option value="finance">Financial Services</option>
         <option value="healthcare">Healthcare</option>
       </select>
-      <button onclick="loadSectorPreset()">Apply Sector Preset</button>
+      <button class="btn-primary" onclick="loadSectorPreset()">Load Sector Template</button>
     </div>
     
     <div id="sectorDescription" class="sector-description">
-      <strong>Custom Mode:</strong> Define your own risks and weights
-    </div>
-    
-    <div class="benchmark-toggle">
-      <input type="checkbox" id="showBenchmark">
-      <label for="showBenchmark">Show sector average benchmarks (for comparison)</label>
+      Select an industry to see specific risk categories and default weights.
     </div>
   </div>
 
-  <!-- Risk Scoring Controls -->
-  <div class="section">
+  <!-- Controls Section (Shown after data entry) -->
+  <div id="controlsSection" class="section hidden">
     <h2>⚖️ Risk Scoring Controls</h2>
     <div class="controls">
       <div class="control-group">
@@ -60,7 +144,7 @@
         <input type="range" id="probWeight" min="1" max="5" value="3" step="0.5">
         <div class="control-range">
           <span>Conservative</span>
-          <span>Agressive</span>
+          <span>Aggressive</span>
         </div>
       </div>
       
@@ -80,7 +164,10 @@
 
   <!-- Dashboard Content (Initially Hidden) -->
   <div id="dashboard" class="hidden">
-
+    <!-- All existing dashboard sections remain exactly as before -->
+    <!-- Heatmap, Momentum Tracker, Capital Allocation, Export, etc. -->
+    <!-- (Content from previous version - not repeating for brevity) -->
+    
     <!-- Heatmap Section -->
     <div class="section">
       <h2>📊 Portfolio ESG Risk Heatmap</h2>
@@ -187,12 +274,17 @@
         <strong>Note:</strong> Edit these rules directly in <code>script.js</code> to match your organization's risk appetite.
       </p>
     </div>
+  </div>
 
+  <!-- Navigation Bar -->
+  <div class="nav-bar">
+    <button class="nav-btn" onclick="goBackToInput()">← Back to Data Entry</button>
+    <span class="nav-status" id="navStatus">No data entered yet</span>
   </div>
 
   <!-- Footer -->
   <footer>
-    <p>ESG Risk Decision Dashboard v1.1 • Client-Side Edition</p>
+    <p>ESG Risk Decision Dashboard v1.2 • Client-Side Edition</p>
     <p class="footer-note">
       All calculations run locally in your browser. No data is stored or transmitted.
       <br>Built for finance, risk, and sustainability teams.
